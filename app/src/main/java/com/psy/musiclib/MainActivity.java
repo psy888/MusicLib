@@ -1,24 +1,16 @@
 package com.psy.musiclib;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
-import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.webkit.PermissionRequest;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,8 +18,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.Permission;
-import java.security.Permissions;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,19 +62,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
 //        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
-
-        File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        for (File f:
-             musicDir.listFiles()) {
-            Log.d(TAG,f.getName());
-            if(f.getName().substring(f.getName().lastIndexOf(".")+1).contentEquals("mp3")){
-                Log.d(TAG,"ADDED " + f.getName());
-                new Track(f);
-            }
+if(mAlbumsList==null|mAlbumsList.size()<1) {
+    File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+    for (File f :
+            musicDir.listFiles()) {
+        Log.d(TAG, f.getName());
+        if (f.getName().substring(f.getName().lastIndexOf(".") + 1).contentEquals("mp3")) {
+            Log.d(TAG, "ADDED " + f.getName());
+            new Track(f);
         }
+    }
+
+}
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
 
         RecyclerView rvCardsList = findViewById(R.id.rvCardsList);
-        rvCardsList.setHasFixedSize(true);
+//        rvCardsList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rvCardsList.setLayoutManager(llm);
