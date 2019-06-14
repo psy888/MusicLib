@@ -1,6 +1,8 @@
 package com.psy.musiclib;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
@@ -10,6 +12,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = "----"+MainActivity.class.getName();
     private final static String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
     protected static ArrayList<Album> mAlbumsList;
+    protected static ArrayList<Album> mSearchResult;
+    Toolbar mToolbar;
+    RecyclerView rvCardsList;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -74,11 +83,15 @@ if(mAlbumsList==null|mAlbumsList.size()<1) {
     }
 
 }
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        mToolbar.findViewById(R.id.ibSearch).setOnClickListener(toolbarListener);
+        mToolbar.findViewById(R.id.ibBack).setOnClickListener(toolbarListener);
 
 
-        RecyclerView rvCardsList = findViewById(R.id.rvCardsList);
+
+
+        rvCardsList = findViewById(R.id.rvCardsList);
 //        rvCardsList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -113,6 +126,61 @@ if(mAlbumsList==null|mAlbumsList.size()<1) {
         } catch (IOException e) {
             Log.e(TAG, "Can't write base");
             e.printStackTrace();
+        }
+    }
+
+    View.OnClickListener toolbarListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.ibSearch:
+                    search();
+                    hideKeyboardFrom(MainActivity.this);
+                    break;
+                case R.id.ibBack:
+                    toggleToolbarState();
+                    rvCardsList.setAdapter(new CardAdapter(mAlbumsList));
+                    break;
+            }
+        }
+    };
+
+    public void hideKeyboardFrom(Context context) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(MainActivity.this.findViewById(R.id.mainContainer).getWindowToken(), 0);
+    }
+    void search(){
+        EditText etSearch =  mToolbar.findViewById(R.id.etSearch);
+        String query = etSearch.getText().toString();
+        searchInAlbums(query);
+        if(mSearchResult.size()>0){
+            rvCardsList.setAdapter(new CardAdapter(mSearchResult));
+            toggleToolbarState();
+        }
+
+    }
+
+    void toggleToolbarState(){
+        if(mToolbar.findViewById(R.id.etSearch).getVisibility() == View.VISIBLE){
+            mToolbar.findViewById(R.id.etSearch).setVisibility(View.GONE);
+            mToolbar.findViewById(R.id.ibSearch).setVisibility(View.GONE);
+            mToolbar.findViewById(R.id.ibBack).setVisibility(View.VISIBLE);
+        }
+        else{
+            mToolbar.findViewById(R.id.etSearch).setVisibility(View.VISIBLE);
+            mToolbar.findViewById(R.id.ibSearch).setVisibility(View.VISIBLE);
+            mToolbar.findViewById(R.id.ibBack).setVisibility(View.GONE);
+        }
+    }
+    void searchInAlbums(String query){
+        //clear previous results
+        mSearchResult = new ArrayList<>();
+        //search
+        for (Album album:
+             mAlbumsList) {
+            if(album.getName().toLowerCase().contains(query.toLowerCase())){
+                mSearchResult.add(album);
+            }
         }
     }
 }
