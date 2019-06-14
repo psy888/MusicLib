@@ -5,16 +5,25 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,12 +36,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private final static String BASE = "media.base";
-    private final static String TAG = "----"+MainActivity.class.getName();
-    private final static String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
+    private final static String TAG = "----" + MainActivity.class.getName();
+    private final static String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
     protected static ArrayList<Album> mAlbumsList;
     protected static ArrayList<Album> mSearchResult;
     Toolbar mToolbar;
-    RecyclerView rvCardsList;
+    protected  RecyclerView rvCardsList;
+    ArrayList<Track> mTracks;
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -43,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         requestPermissions(PERMISSIONS, 88);
 
-        if(savedInstanceState==null){
+        if (savedInstanceState == null) {
             try {
                 FileInputStream fis = openFileInput(BASE);
                 ObjectInputStream ois = new ObjectInputStream(fis);
@@ -55,10 +65,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (ClassNotFoundException e) {
                 Log.e(TAG, "Can't read base");
                 e.printStackTrace();
-            }
-            finally {
-                if(mAlbumsList==null)
-                {
+            } finally {
+                if (mAlbumsList == null) {
                     File base = new File(BASE);
                     try {
                         base.createNewFile();
@@ -71,32 +79,53 @@ public class MainActivity extends AppCompatActivity {
         }
 
 //        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
-if(mAlbumsList==null|mAlbumsList.size()<1) {
-    File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    for (File f :
-            musicDir.listFiles()) {
-        Log.d(TAG, f.getName());
-        if (f.getName().substring(f.getName().lastIndexOf(".") + 1).contentEquals("mp3")) {
-            Log.d(TAG, "ADDED " + f.getName());
-            new Track(f);
-        }
-    }
+        if (mAlbumsList == null | mAlbumsList.size() < 1) {
+            File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            for (File f :
+                    musicDir.listFiles()) {
+                Log.d(TAG, f.getName());
+                if (f.getName().substring(f.getName().lastIndexOf(".") + 1).contentEquals("mp3")) {
+                    Log.d(TAG, "ADDED " + f.getName());
+                    new Track(f);
+                }
+            }
 
-}
+        }
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mToolbar.findViewById(R.id.ibSearch).setOnClickListener(toolbarListener);
         mToolbar.findViewById(R.id.ibBack).setOnClickListener(toolbarListener);
+        EditText etSearch = mToolbar.findViewById(R.id.etSearch);
+        /**
+         * on ENTER KEY listener
+         */
+        etSearch.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+//                    search();
+//                    hideKeyboardFrom(MainActivity.this);
+                    mToolbar.findViewById(R.id.ibSearch).callOnClick();
+                    return true;
 
+                }
 
+                return false;
+            }
+        });
 
 
         rvCardsList = findViewById(R.id.rvCardsList);
 //        rvCardsList.setHasFixedSize(true);
 
-        LinearLayoutManager llm = new LinearLayoutManager(this);
+        final LinearLayoutManager llm = new LinearLayoutManager(this);
         rvCardsList.setLayoutManager(llm);
         rvCardsList.setAdapter(new CardAdapter(mAlbumsList));
+
+
+
+
+
 
         /*
         Log.d(TAG,"ALBUMS CNT " + mAlbumsList.size());
@@ -132,7 +161,7 @@ if(mAlbumsList==null|mAlbumsList.size()<1) {
     View.OnClickListener toolbarListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.ibSearch:
                     search();
                     hideKeyboardFrom(MainActivity.this);
@@ -149,38 +178,46 @@ if(mAlbumsList==null|mAlbumsList.size()<1) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(MainActivity.this.findViewById(R.id.mainContainer).getWindowToken(), 0);
     }
-    void search(){
-        EditText etSearch =  mToolbar.findViewById(R.id.etSearch);
+
+    void search() {
+        EditText etSearch = mToolbar.findViewById(R.id.etSearch);
         String query = etSearch.getText().toString();
         searchInAlbums(query);
-        if(mSearchResult.size()>0){
+        if (mSearchResult.size() > 0) {
             rvCardsList.setAdapter(new CardAdapter(mSearchResult));
             toggleToolbarState();
         }
 
     }
 
-    void toggleToolbarState(){
-        if(mToolbar.findViewById(R.id.etSearch).getVisibility() == View.VISIBLE){
+    void toggleToolbarState() {
+        if (mToolbar.findViewById(R.id.etSearch).getVisibility() == View.VISIBLE) {
             mToolbar.findViewById(R.id.etSearch).setVisibility(View.GONE);
             mToolbar.findViewById(R.id.ibSearch).setVisibility(View.GONE);
             mToolbar.findViewById(R.id.ibBack).setVisibility(View.VISIBLE);
-        }
-        else{
+        } else {
             mToolbar.findViewById(R.id.etSearch).setVisibility(View.VISIBLE);
             mToolbar.findViewById(R.id.ibSearch).setVisibility(View.VISIBLE);
             mToolbar.findViewById(R.id.ibBack).setVisibility(View.GONE);
+            ((TextView) mToolbar.findViewById(R.id.etSearch)).setText("");
         }
     }
-    void searchInAlbums(String query){
+
+    void searchInAlbums(String query) {
         //clear previous results
         mSearchResult = new ArrayList<>();
+        query = query.trim().toLowerCase();
         //search
-        for (Album album:
-             mAlbumsList) {
-            if(album.getName().toLowerCase().contains(query.toLowerCase())){
+        for (Album album :
+                mAlbumsList) {
+            boolean name = (album.getName() != null) && album.getName().toLowerCase().contains(query);
+            boolean year = (album.getYear() != null) && album.getYear().toLowerCase().contentEquals(query);
+            boolean artist = (album.getArtist() != null) && album.getArtist().toLowerCase().contains(query);
+            if (name | year | artist) {
                 mSearchResult.add(album);
             }
         }
     }
+
 }
+

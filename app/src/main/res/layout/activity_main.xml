@@ -17,7 +17,7 @@
         <android.support.v7.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-
+            android:background="#FF5722"
             android:fitsSystemWindows="true"
             android:id="@+id/toolbar">
             <LinearLayout
@@ -29,18 +29,21 @@
                     android:layout_height="match_parent"
                     android:visibility="gone"
                     android:id="@+id/ibBack"
+                    android:background="#00FFFFFF"
                     android:src="@drawable/ic_back"/>
 
                 <EditText
                     android:layout_weight="4"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:maxLines="1"
                     android:id="@+id/etSearch"/>
                 <ImageButton
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:id="@+id/ibSearch"
+                    android:background="#00FFFFFF"
                     android:src="@drawable/ic_search"/>
             </LinearLayout>
 
@@ -57,14 +60,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/fab"
-            android:layout_gravity="bottom|right"
+            android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:src="@drawable/ic_search"/>
     </android.support.design.widget.CoordinatorLayout>
     <android.support.design.widget.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         app:menu="@menu/main_menu"
         app:headerLayout="@layout/menu_header"/>
 </android.support.v4.widget.DrawerLayout>

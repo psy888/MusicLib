@@ -9,8 +9,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -18,8 +20,8 @@ import java.util.ArrayList;
 
 class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
 
-    int cnt=0;
     ArrayList<Album> mAlbumsList;
+    int mSelrctedView = -9999;
     public CardAdapter(ArrayList<Album> albums) {
         mAlbumsList = albums;
     }
@@ -29,12 +31,30 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
     public CardHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_view_item,viewGroup,false);
         CardHolder cardHolder = new CardHolder(v);
+
+
         return cardHolder;
     }
 
 
     @Override
-    public void onBindViewHolder(@NonNull CardHolder cardHolder, int i) {
+    public void onBindViewHolder(@NonNull final CardHolder cardHolder, final int i) {
+        cardHolder.cvCard.setId(i);
+        Log.d("CLICK", " ID = " + cardHolder.cvCard.getId() + "     Selected " + mSelrctedView);
+        if(i==mSelrctedView){
+            cardHolder.lvPlayList.setVisibility(View.VISIBLE);
+            cardHolder.tvAlbumTitle.setVisibility(View.GONE);
+            cardHolder.tvAlbumArtist.setVisibility(View.GONE);
+            cardHolder.tvAlbumYear.setVisibility(View.GONE);
+            cardHolder.ivAlbumCover.setVisibility(View.GONE);
+        }
+        else{
+            cardHolder.lvPlayList.setVisibility(View.GONE);
+            cardHolder.tvAlbumTitle.setVisibility(View.VISIBLE);
+            cardHolder.tvAlbumArtist.setVisibility(View.VISIBLE);
+            cardHolder.tvAlbumYear.setVisibility(View.VISIBLE);
+            cardHolder.ivAlbumCover.setVisibility(View.VISIBLE);
+        }
         int textColor = getTextColor(mAlbumsList.get(i).getVibrantColor());
         //Set Text color based on background
         cardHolder.tvAlbumTitle.setTextColor(textColor);
@@ -58,6 +78,63 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
         }
         cardHolder.cardContainer.setBackgroundColor(mAlbumsList.get(i).getVibrantColor());
 //        Log.d("CARD", " ------- " + cnt++);
+
+//        cardHolder.lvPlayList.setVisibility(View.VISIBLE);
+
+
+
+        cardHolder.cvCard.setOnClickListener( new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                mSelrctedView=v.getId();
+                if(cardHolder.tvAlbumTitle.getVisibility()==View.VISIBLE) {
+                    cardHolder.lvPlayList.setVisibility(View.VISIBLE);
+                    cardHolder.tvAlbumTitle.setVisibility(View.GONE);
+                    cardHolder.tvAlbumArtist.setVisibility(View.GONE);
+                    cardHolder.tvAlbumYear.setVisibility(View.GONE);
+                    cardHolder.ivAlbumCover.setVisibility(View.GONE);
+                    Log.d("CLICK", v.toString());
+//                     Album curAlbum = mAlbumsList.get(i);
+//                    for (Track t:
+//                            curAlbum.getTrackList()) {
+//                        Log.d("TRACK", t.getTitle() + " " + t.getYear() + " " + t.getTrackFile().getAbsolutePath());
+
+//            int index = rvCardsList.getChildAdapterPosition(v);
+//                CardView playlist = (CardView) LayoutInflater.from(v.getContext()).inflate(R.layout.playlist, (ViewGroup) v.getParent(), false);
+//                ListView lvPlaylist = playlist.findViewById(R.id.lvPlaylist);
+                    cardHolder.lvPlayList.setAdapter(new ArrayAdapter<Track>(cardHolder.cardContainer.getContext(), R.layout.playlist_item, R.id.tvTrackName, mAlbumsList.get(i).getTrackList()) {
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            View v = super.getView(position, convertView, parent);
+                            Track track = this.getItem(position);
+                            TextView tvTrackNumber = v.findViewById(R.id.tvTrackNumber);
+                            TextView tvTrackName = v.findViewById(R.id.tvTrackName);
+                            tvTrackNumber.setText(String.valueOf(position+1));
+                            tvTrackName.setText(track.getTitle());
+                            Log.d("COUNT", "++++++++++" + track.getTitle());
+                            v.setTag(track);
+
+                            return v;
+
+                        }
+                    });
+//                    cardHolder.lvPlayList.setAdapter(new ArrayAdapter<Track>(v.getContext(),android.R.layout.simple_list_item_1,curAlbum.getTrackList()));
+//                    cardHolder.cardContainer.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                }
+                else{
+                    cardHolder.lvPlayList.setVisibility(View.GONE);
+                    cardHolder.tvAlbumTitle.setVisibility(View.VISIBLE);
+                    cardHolder.tvAlbumArtist.setVisibility(View.VISIBLE);
+                    cardHolder.tvAlbumYear.setVisibility(View.VISIBLE);
+                    cardHolder.ivAlbumCover.setVisibility(View.VISIBLE);
+                    mSelrctedView=-999;
+                }
+            }
+
+        });
+
     }
 
 
@@ -67,7 +144,8 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
     }
 
     @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
+
         super.onAttachedToRecyclerView(recyclerView);
     }
 
@@ -82,6 +160,7 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
         TextView tvAlbumArtist;
         TextView tvAlbumYear;
         ImageView ivAlbumCover;
+        ListView lvPlayList;
 
         LinearLayout cardContainer;
 
@@ -93,6 +172,7 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             tvAlbumYear = itemView.findViewById(R.id.tvAlbumYear);
             ivAlbumCover = itemView.findViewById(R.id.ivAlbumCover);
             cardContainer = itemView.findViewById(R.id.cardContainer);
+            lvPlayList = itemView.findViewById(R.id.lvPlaylist);
         }
     }
 
@@ -109,4 +189,6 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             return Color.rgb(224,224,224); //light text color
         }
     }
+
+
 }
