@@ -12,8 +12,8 @@ class Track {
     private String mTitle;
     private String mArtist;
     private String mDuration;
-    private String mYear; //todo: get from album or set to album
-    private String mGenre; //todo: get from album or set to album
+    private String mYear;
+    private String mGenre;
     private String mAlbumTitle;
     private Album mAlbum; //Link to Album Object???
     private File mTrackFile; // save file destination

@@ -119,7 +119,7 @@ public class Album {
     public void getBgColor(Bitmap bitmap){
 //        if(bitmap!=null) {
 //            mVibrantColor = Palette.from(bitmap).generate().getDominantColor(Color.rgb(128,128,128));
-            mVibrantColor = Palette.from(bitmap).generate().getVibrantColor(Color.rgb(128,128,128));
+            mVibrantColor = Palette.from(bitmap).generate().getMutedColor(Color.rgb(128,128,128));
             /*Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
                 @Override
                 public void onGenerated(@Nullable Palette palette) {
