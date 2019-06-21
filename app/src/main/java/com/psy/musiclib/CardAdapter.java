@@ -1,14 +1,19 @@
 package com.psy.musiclib;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,11 +22,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
 
     ArrayList<Album> mAlbumsList;
     int mSelrctedView = -9999;
+    View.OnClickListener mOnClickListener;
     public CardAdapter(ArrayList<Album> albums) {
         mAlbumsList = albums;
     }
@@ -41,7 +48,7 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
     public void onBindViewHolder(@NonNull final CardHolder cardHolder, final int i) {
         cardHolder.cvCard.setId(i);
         Log.d("CLICK", " ID = " + cardHolder.cvCard.getId() + "     Selected " + mSelrctedView);
-        if(i==mSelrctedView){
+        /*if(i==mSelrctedView){
             cardHolder.lvPlayList.setVisibility(View.VISIBLE);
             cardHolder.tvAlbumTitle.setVisibility(View.GONE);
             cardHolder.tvAlbumArtist.setVisibility(View.GONE);
@@ -54,7 +61,7 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             cardHolder.tvAlbumArtist.setVisibility(View.VISIBLE);
             cardHolder.tvAlbumYear.setVisibility(View.VISIBLE);
             cardHolder.ivAlbumCover.setVisibility(View.VISIBLE);
-        }
+        }*/
         int textColor = getTextColor(mAlbumsList.get(i).getVibrantColor());
         //Set Text color based on background
         cardHolder.tvAlbumTitle.setTextColor(textColor);
@@ -64,24 +71,36 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
         cardHolder.tvAlbumTitle.setText(mAlbumsList.get(i).getName());
         cardHolder.tvAlbumArtist.setText(mAlbumsList.get(i).getArtist());
         cardHolder.tvAlbumYear.setText(mAlbumsList.get(i).getYear());
-        Bitmap cover = mAlbumsList.get(i).getCover();
 
-        if(cover!=null) {
+        cardHolder.cardContainer.setBackgroundColor(mAlbumsList.get(i).getVibrantColor());
 
-            cardHolder.ivAlbumCover.setImageBitmap(cover);
+        if(mAlbumsList.get(i).getCover()!=null) {
+
+            cardHolder.ivAlbumCover.setImageBitmap(mAlbumsList.get(i).getCover());
             cardHolder.ivAlbumCover.setVisibility(View.VISIBLE);
 
         }
         else
         {
-            cardHolder.ivAlbumCover.setVisibility(View.GONE);
+            cardHolder.ivAlbumCover.setVisibility(View.INVISIBLE);
         }
-        cardHolder.cardContainer.setBackgroundColor(mAlbumsList.get(i).getVibrantColor());
 //        Log.d("CARD", " ------- " + cnt++);
 
 //        cardHolder.lvPlayList.setVisibility(View.VISIBLE);
 
+//        if(mOnClickListener!=null){
+            cardHolder.cvCard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = v.getId();
+                    View nv = LayoutInflater.from(v.getContext()).inflate(R.layout.playlist, null,false);
+                    Fragment playlist = new PlayListFragment();
+                    //toDo get context AND START fragment activity
+                }
+            });
+//        }
 
+        /*
 
         cardHolder.cvCard.setOnClickListener( new View.OnClickListener() {
 
@@ -134,9 +153,22 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             }
 
         });
+        */
 
     }
+    /*
+    public void add(){
+        this
+    }
+*/
+//    mOnClickListener = ;
+    public Album getItem(int position){
+        return mAlbumsList.get(position);
+    }
 
+    public void setOnItemClickListener(View.OnClickListener listener){
+        mOnClickListener = listener;
+    }
 
     @Override
     public int getItemCount() {
@@ -174,13 +206,16 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             cardContainer = itemView.findViewById(R.id.cardContainer);
             lvPlayList = itemView.findViewById(R.id.lvPlaylist);
         }
+
+
     }
 
+    //------------------------------------------------------------------------------
     int getTextColor(int bgColor){
         /**
          * Y = (299*R + 587*G + 114*B)/1000
          */
-
+        Log.d("TEXT COLOR", "-------------- bgColor IN" + bgColor);
         double darkness = 1-(0.299* Color.red(bgColor) + 0.587*Color.green(bgColor) + 0.114*Color.blue(bgColor))/255;
         Log.d("TEXT COLOR", "--------------" + darkness);
         if(darkness<0.5){// It's a light bg color
@@ -189,6 +224,7 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
             return Color.rgb(224,224,224); //light text color
         }
     }
+
 
 
 }

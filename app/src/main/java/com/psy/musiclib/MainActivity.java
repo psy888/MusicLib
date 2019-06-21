@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private final static String TAG = "----" + MainActivity.class.getName();
     private final static String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
     protected static ArrayList<Album> mAlbumsList;
+    protected static ArrayList<Track> mTrackList;
     protected static ArrayList<Album> mSearchResult;
     Toolbar mToolbar;
     protected  RecyclerView rvCardsList;
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         requestPermissions(PERMISSIONS, 88);
-
+/*
         if (savedInstanceState == null) {
             try {
                 FileInputStream fis = openFileInput(BASE);
@@ -77,7 +78,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
+*/
+mAlbumsList = new ArrayList<>();
+mTrackList= new ArrayList<>();
 //        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
         if (mAlbumsList == null | mAlbumsList.size() < 1) {
             File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -144,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        /*
         try {
             FileOutputStream fos = openFileOutput(BASE, MODE_PRIVATE);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -155,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "Can't write base");
             e.printStackTrace();
-        }
+        }*/
     }
 
     View.OnClickListener toolbarListener = new View.OnClickListener() {

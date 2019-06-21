@@ -21,20 +21,24 @@ class Track {
 
 
     public Track(File trackFile) {
+        String unknown = "unknown";
         mTrackFile = trackFile;
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(trackFile.getAbsolutePath());
-        mTitle = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        mArtist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        mDuration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        mYear = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR);
-        mGenre = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-        mAlbumTitle = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        mAlbumKey = MediaStore.Audio.keyFor(mAlbumTitle);
+        mTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE):unknown;
+        mArtist = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST):unknown;
+//        mDuration = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!=null);
+        mYear = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR):"-";
+        mGenre = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE):"-";
+        mAlbumTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM):unknown;
+//        mAlbumKey = MediaStore.Audio.keyFor(mAlbumTitle);
 
-        mAlbum = StructureBuilder.findAlbum(this,MainActivity.mAlbumsList);//???
+        MainActivity.mTrackList.add(this);
+        mAlbum = StructureBuilder.findAlbum((MainActivity.mTrackList.size()-1),MainActivity.mAlbumsList);//???
         byte[] src = mmr.getEmbeddedPicture();
-        mAlbum.setCover(BitmapFactory.decodeByteArray(src,0, src.length));
+        if(src!=null) {
+            mAlbum.setCover(src);
+        }
 
     }
 

@@ -1,38 +1,47 @@
 package com.psy.musiclib;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 public class Album {
+    private ArrayList<Integer> mTrackList;
+//    private ArrayList<Track> mTrackList;
     private String mName;
     private String mYear;
     private  String mGenre;
     private String mArtist;
     private int mTrackCnt;
-    private ArrayList<Track> mTrackList;
     private Uri CoverUri; //todo get from Internet ??
     private String mKey;
-    private Bitmap mCover;
+//    private Bitmap mCover;
+    private byte[] mCover;
+    transient private Bitmap mCoverBitmap;
     private int mVibrantColor;
     /**
-     *
+     *_
      * @param name - Album title
      * @param year - Album Year
      * @param genre - Album genre
      * @param artist - Album artist;
      */
     Album(String name, String year, String genre, String artist) {
-        mName = name;
-        mYear = year;
-        mGenre = genre;
-        mArtist = artist;
+        String unknown = "Unknown";
+        mName = (name!=null)?name:unknown;
+        mYear = (year!=null)?year:"-";
+        mGenre = (genre!=null)?genre:"-";
+        mArtist = (artist!=null)?artist:unknown;
         mKey = MediaStore.Audio.keyFor(name);
         mTrackList = new ArrayList<>();
+        mVibrantColor = Color.rgb(128,128,128);
+
         //add to base
         MainActivity.mAlbumsList.add(this);
     }
@@ -82,20 +91,17 @@ public class Album {
     }
 
     ArrayList<Track> getTrackList() {
-        return mTrackList;
+        ArrayList<Track> trackList = new ArrayList<>();
+        for (int i = 0; i < mTrackList.size(); i++) {
+            trackList.add(MainActivity.mTrackList.get(this.mTrackList.get(i)));
+        }
+        return trackList;
     }
 
-    public void setTrackList(ArrayList<Track> trackList) {
-        mTrackList = trackList;
+    public void addTrack(int i){
+        mTrackList.add(i);
     }
 
-    public Uri getCoverUri() {
-        return CoverUri;
-    }
-
-    public void setCoverUri(Uri coverUri) {
-        CoverUri = coverUri;
-    }
 
     public String getKey() { return mKey;}
 
@@ -107,31 +113,63 @@ public class Album {
                 "Artist : " + mArtist + " | ";
     }
 
-    public void setCover(Bitmap decodeByteArray) {
-        mCover = decodeByteArray;
-        getBgColor(mCover);
+    public void setCover(byte[] BitmapByteArray) {
+        mCover = BitmapByteArray;
+        //ToDo compress Bitmap byte array
+        Log.d("ALBUM COVER", "Byte Array IN = " + (mCover.length / 1024) + " kb");
+        //Compress bitmap
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = calculateInSampleSize(options,50,50);
+        mCoverBitmap = BitmapFactory.decodeByteArray(mCover, 0, mCover.length, options);
+        //compress byte array
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mCoverBitmap.compress(Bitmap.CompressFormat.JPEG, 30, baos);
+        mCover = baos.toByteArray();
+        Log.d("ALBUM COVER", "Byte Array OUT = " + (mCover.length / 1024) + " kb");
+        getBgColor(mCoverBitmap);
     }
 
     public Bitmap getCover() {
-        return mCover;
+        if(mCover==null) return null;
+        if(mCoverBitmap==null) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = calculateInSampleSize(options,150,150);
+        mCoverBitmap = BitmapFactory.decodeByteArray(mCover, 0, mCover.length, options); }
+        return mCoverBitmap;
     }
 
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+
     public void getBgColor(Bitmap bitmap){
-//        if(bitmap!=null) {
-//            mVibrantColor = Palette.from(bitmap).generate().getDominantColor(Color.rgb(128,128,128));
-            mVibrantColor = Palette.from(bitmap).generate().getMutedColor(Color.rgb(128,128,128));
-            /*Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(@Nullable Palette palette) {
-                    mVibrantColor = palette.getVibrantSwatch().getRgb();
-                }
-            });*/
-//        }else{
-//         mVibrantColor = Color.rgb(192,192,192);
-//        }
+        mVibrantColor = Palette.from(bitmap).generate().getMutedColor(Color.rgb(128, 128, 128));
     }
 
     public int getVibrantColor() {
         return mVibrantColor;
     }
+
 }
