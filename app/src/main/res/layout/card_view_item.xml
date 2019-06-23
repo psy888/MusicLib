@@ -45,12 +45,7 @@
                     android:id="@+id/tvAlbumYear"
                     android:textSize="@dimen/yearText"
                     tools:text="2007"/>
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:overScrollMode="always"
-                    android:id="@+id/lvPlaylist"
-                    android:visibility="gone"/>
+
 
             </LinearLayout>
             <ImageView

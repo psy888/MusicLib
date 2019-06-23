@@ -84,20 +84,25 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
         {
             cardHolder.ivAlbumCover.setVisibility(View.INVISIBLE);
         }
+
+        if(mOnClickListener!=null){
+            cardHolder.cvCard.setOnClickListener(mOnClickListener);
+        }
 //        Log.d("CARD", " ------- " + cnt++);
 
 //        cardHolder.lvPlayList.setVisibility(View.VISIBLE);
 
 //        if(mOnClickListener!=null){
-            cardHolder.cvCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = v.getId();
-                    View nv = LayoutInflater.from(v.getContext()).inflate(R.layout.playlist, null,false);
-                    Fragment playlist = new PlayListFragment();
-                    //toDo get context AND START fragment activity
-                }
-            });
+//            cardHolder.cvCard.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    int position = v.getId();
+//                    View nv = LayoutInflater.from(v.getContext()).inflate(R.layout.playlist, null,false);
+//                    Fragment playlist = new PlayListFragment();
+//                    //toDo get context AND START fragment activity
+//                    FragmentManager fm =
+//                }
+//            });
 //        }
 
         /*

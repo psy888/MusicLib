@@ -9,11 +9,13 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/yearText"
         android:id="@+id/tvTrackNumber"/>
     <TextView
         android:layout_width="0dp"
         android:layout_weight="5"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/yearText"
         android:id="@+id/tvTrackName"/>
     <ImageButton
         android:layout_width="0dp"

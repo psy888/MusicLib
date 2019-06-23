@@ -3,10 +3,15 @@ package com.psy.musiclib;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -43,7 +48,9 @@ public class MainActivity extends AppCompatActivity {
     protected static ArrayList<Album> mSearchResult;
     Toolbar mToolbar;
     protected  RecyclerView rvCardsList;
+    protected CardAdapter mCardAdapter;
     ArrayList<Track> mTracks;
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -118,12 +125,16 @@ mTrackList= new ArrayList<>();
         });
 
 
+
         rvCardsList = findViewById(R.id.rvCardsList);
 //        rvCardsList.setHasFixedSize(true);
 
         final LinearLayoutManager llm = new LinearLayoutManager(this);
         rvCardsList.setLayoutManager(llm);
-        rvCardsList.setAdapter(new CardAdapter(mAlbumsList));
+        mCardAdapter = new CardAdapter(mAlbumsList);
+        mCardAdapter.setOnItemClickListener(listener);
+        rvCardsList.setAdapter(mCardAdapter);
+
 
 
 
@@ -161,6 +172,23 @@ mTrackList= new ArrayList<>();
             e.printStackTrace();
         }*/
     }
+    /**
+     * on card click listener
+     */
+    View.OnClickListener listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int position = v.getId();
+    //                View nv = LayoutInflater.from(v.getContext()).inflate(R.layout.playlist, null,false);
+            Fragment playlistFragment = PlayListFragment.newInstance(v.getId());
+
+            //toDo get context AND START fragment activity
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.containerPlaylist ,playlistFragment, String.valueOf(v.getId())).commit();
+            Log.d("CLICK LIST", "CLICKED on " + position);
+
+        }
+    };
 
     View.OnClickListener toolbarListener = new View.OnClickListener() {
         @Override
@@ -172,7 +200,7 @@ mTrackList= new ArrayList<>();
                     break;
                 case R.id.ibBack:
                     toggleToolbarState();
-                    rvCardsList.setAdapter(new CardAdapter(mAlbumsList));
+                    rvCardsList.setAdapter(mCardAdapter);
                     break;
             }
         }
@@ -188,7 +216,10 @@ mTrackList= new ArrayList<>();
         String query = etSearch.getText().toString();
         searchInAlbums(query);
         if (mSearchResult.size() > 0) {
-            rvCardsList.setAdapter(new CardAdapter(mSearchResult));
+            CardAdapter searchAdapter = new CardAdapter(mSearchResult);
+            searchAdapter.setOnItemClickListener(listener);
+            rvCardsList.setAdapter(searchAdapter);
+
             toggleToolbarState();
         }
 
@@ -222,6 +253,8 @@ mTrackList= new ArrayList<>();
             }
         }
     }
+
+
 
 }
 
