@@ -9,9 +9,10 @@ import android.support.v7.graphics.Palette;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Album {
+public class Album implements Serializable {
     private ArrayList<Integer> mTrackList;
 //    private ArrayList<Track> mTrackList;
     private String mName;

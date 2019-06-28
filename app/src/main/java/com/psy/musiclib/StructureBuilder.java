@@ -14,7 +14,7 @@ class StructureBuilder {
      * @param albums - Albums base
      * @return Album link
      */
-    static Album findAlbum(int trackNumber, ArrayList<Album> albums){
+    static int findAlbum(int trackNumber, ArrayList<Album> albums){
 
         Track track = MainActivity.mTrackList.get(trackNumber);
         String albumKey = MediaStore.Audio.keyFor(track.getAlbumTitle());
@@ -29,17 +29,18 @@ class StructureBuilder {
                  */
                 album.addTrack(trackNumber);
 
-                return album;
+                return albums.indexOf(album);
             }
         }
 
         /*
-         * if Album with same name and year not found in base -> create new Album
+         * if Album with the same name and year not found in base -> create new Album
          */
         Album newAlbum =new Album(track.getAlbumTitle(),track.getYear(),track.getGenre(),track.getArtist());
 //        albums.add(newAlbum);
         newAlbum.addTrack(trackNumber);
-        return newAlbum;
+        return albums.indexOf(newAlbum);
+//        return newAlbum;
     }
 
 

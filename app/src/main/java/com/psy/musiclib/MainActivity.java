@@ -3,15 +3,21 @@ package com.psy.musiclib;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.PermissionChecker;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -19,8 +25,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,10 +47,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnRequestPermissionsResultCallback {
     private final static String BASE = "media.base";
+    private final static int PERMISSION_REQUEST_ID =88;
+
     private final static String TAG = "----" + MainActivity.class.getName();
     private final static String[] PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+//    private final static int[] PERMISSIONS_RESULT = new int[]{PermissionChecker.PERMISSION_GRANTED,PermissionChecker.PERMISSION_GRANTED};
     protected static ArrayList<Album> mAlbumsList;
     protected static ArrayList<Track> mTrackList;
     protected static ArrayList<Album> mSearchResult;
@@ -50,8 +61,43 @@ public class MainActivity extends AppCompatActivity {
     protected  RecyclerView rvCardsList;
     protected CardAdapter mCardAdapter;
     ArrayList<Track> mTracks;
+    DrawerLayout mDrawerLayout;
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==PERMISSION_REQUEST_ID)
+        {
+            if(permissions[0].contentEquals(PERMISSIONS[0]) &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    permissions[1].contentEquals(Manifest.permission.READ_EXTERNAL_STORAGE)&&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED)
+            {
+                scanFiles();
+            }
+            else{
+                this.finish();
+            }
+        }
+
+    }
+
+    private void scanFiles() {
+//        if (mAlbumsList == null | mAlbumsList.size() < 1) {
+            File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//            File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
+            for (File f :
+                    musicDir.listFiles()) {
+                Log.d(TAG, f.getName());
+                if (f.getName().substring(f.getName().lastIndexOf(".") + 1).contentEquals("mp3")) {
+                    Log.d(TAG, "ADDED " + f.getName());
+                    new Track(f);
+                }
+            }
+
+//        }
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -59,19 +105,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestPermissions(PERMISSIONS, 88);
-/*
+
+//        onRequestPermissionsResult(PERMISSION_REQUEST_ID,PERMISSIONS,PERMISSIONS_RESULT);
+//        checkSelfPermission(PERMISSIONS[0]);
+
+
         if (savedInstanceState == null) {
             try {
                 FileInputStream fis = openFileInput(BASE);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 mAlbumsList = (ArrayList<Album>) ois.readObject();
+                mTrackList = (ArrayList<Track>) ois.readObject();
                 ois.close();
+                Log.e(TAG, "Readed");
             } catch (IOException e) {
-                Log.e(TAG, "Can't open base");
+                Log.e(TAG, "Can't open base" + e.getMessage());
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                Log.e(TAG, "Can't read base");
+                Log.e(TAG, "Can't read base" + e.getMessage());
                 e.printStackTrace();
             } finally {
                 if (mAlbumsList == null) {
@@ -82,30 +133,39 @@ public class MainActivity extends AppCompatActivity {
                         e1.printStackTrace();
                     }
                     mAlbumsList = new ArrayList<>();
+                    mTrackList= new ArrayList<>();
                 }
             }
         }
-*/
-mAlbumsList = new ArrayList<>();
-mTrackList= new ArrayList<>();
-//        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
-        if (mAlbumsList == null | mAlbumsList.size() < 1) {
-            File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            for (File f :
-                    musicDir.listFiles()) {
-                Log.d(TAG, f.getName());
-                if (f.getName().substring(f.getName().lastIndexOf(".") + 1).contentEquals("mp3")) {
-                    Log.d(TAG, "ADDED " + f.getName());
-                    new Track(f);
-                }
-            }
 
-        }
+        requestPermissions(PERMISSIONS, PERMISSION_REQUEST_ID);
+
+//mAlbumsList = new ArrayList<>();
+//        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
+
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mToolbar.findViewById(R.id.ibSearch).setOnClickListener(toolbarListener);
         mToolbar.findViewById(R.id.ibBack).setOnClickListener(toolbarListener);
+        mDrawerLayout = findViewById(R.id.mainContainer);
         EditText etSearch = mToolbar.findViewById(R.id.etSearch);
+        final NavigationView navigationView = findViewById(R.id.navView);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+//                switch (menuItem.getItemId()){
+//                    case R.id.one:
+                mAlbumsList = null;
+                mTrackList = null;
+                        reloadBase();
+                        mDrawerLayout.closeDrawer(Gravity.START);
+
+                Log.e(TAG, "reloadBase-----------------------------");
+//                        break;
+//                }
+                return true;
+            }
+        });
         /**
          * on ENTER KEY listener
          */
@@ -123,10 +183,14 @@ mTrackList= new ArrayList<>();
                 return false;
             }
         });
+        etSearch.clearFocus();
 
 
 
         rvCardsList = findViewById(R.id.rvCardsList);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            rvCardsList.setFocusedByDefault(true);
+        }
 //        rvCardsList.setHasFixedSize(true);
 
         final LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -155,14 +219,27 @@ mTrackList= new ArrayList<>();
 
     }
 
+    private void reloadBase() {
+        mAlbumsList = new ArrayList<>();
+        mTrackList = new ArrayList<>();
+        scanFiles();
+//        mCardAdapter.notifyDataSetChanged();
+        mCardAdapter = new CardAdapter(mAlbumsList);
+        rvCardsList.setAdapter( mCardAdapter);
+        mCardAdapter.setOnItemClickListener(listener);
+        Log.d("TAG", "RELOADED");
+
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        /*
+
         try {
             FileOutputStream fos = openFileOutput(BASE, MODE_PRIVATE);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(mAlbumsList);
+            oos.writeObject(mTrackList);
             oos.flush();
             oos.close();
         } catch (FileNotFoundException e) {
@@ -170,7 +247,7 @@ mTrackList= new ArrayList<>();
         } catch (IOException e) {
             Log.e(TAG, "Can't write base");
             e.printStackTrace();
-        }*/
+        }
     }
     /**
      * on card click listener
@@ -253,6 +330,7 @@ mTrackList= new ArrayList<>();
             }
         }
     }
+
 
 
 

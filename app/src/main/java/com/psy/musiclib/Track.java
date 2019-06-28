@@ -6,8 +6,9 @@ import android.media.MediaMetadataRetriever;
 import android.provider.MediaStore;
 
 import java.io.File;
+import java.io.Serializable;
 
-class Track {
+class Track implements Serializable {
     private static String mAlbumKey;
     private String mTitle;
     private String mArtist;
@@ -17,6 +18,7 @@ class Track {
     private String mAlbumTitle;
     private Album mAlbum; //Link to Album Object???
     private File mTrackFile; // save file destination
+    private int mAlbumIndex;
 
 
 
@@ -25,8 +27,8 @@ class Track {
         mTrackFile = trackFile;
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(trackFile.getAbsolutePath());
-        mTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE):unknown;
-        mArtist = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST):unknown;
+        mTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE):getTitleFromFileName(trackFile);
+        mArtist = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST):getArtistFromFileName(trackFile);
 //        mDuration = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!=null);
         mYear = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR):"-";
         mGenre = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE):"-";
@@ -34,10 +36,10 @@ class Track {
 //        mAlbumKey = MediaStore.Audio.keyFor(mAlbumTitle);
 
         MainActivity.mTrackList.add(this);
-        mAlbum = StructureBuilder.findAlbum((MainActivity.mTrackList.size()-1),MainActivity.mAlbumsList);//???
+        mAlbumIndex = StructureBuilder.findAlbum((MainActivity.mTrackList.size()-1),MainActivity.mAlbumsList);//???
         byte[] src = mmr.getEmbeddedPicture();
         if(src!=null) {
-            mAlbum.setCover(src);
+            MainActivity.mAlbumsList.get(mAlbumIndex).setCover(src);
         }
 
     }
@@ -103,4 +105,29 @@ class Track {
     }
 
     String getAlbumTitle() { return mAlbumTitle; }
+
+    String getArtistFromFileName(File f){
+        String artist = f.getName();
+        artist = artist.substring(0,getIndexOfDevider(artist));
+        return artist;
+    }
+    //index + 1
+    String getTitleFromFileName(File f){
+        String title = f.getName();
+
+        title = title.substring(getIndexOfDevider(title)+ 1,title.lastIndexOf("."));
+        return title;
+    }
+
+    int getIndexOfDevider(String str){
+        int index = str.indexOf("-");
+        if(index>-1){
+            return index;
+        }
+        index = str.indexOf(" ");
+        if(index>-1){
+            return index;
+        }
+        return 0;
+    }
 }

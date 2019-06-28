@@ -99,6 +99,10 @@ protected MediaPlayer mMediaPlayer;
 //                Log.d("COUNT", "++++++++++" + track.getTitle());
                 final ImageButton ibPlay = v.findViewById(R.id.ibPlay);
                 final ImageButton ibPause = v.findViewById(R.id.ibPause);
+//                ImageView ivCover = v.findViewById(R.id.ivAlbumCoverPL);
+//                if(mAlbumsList.get(mAlbumIndex).getCover()!=null){
+//                    ivCover.setImageBitmap(mAlbumsList.get(mAlbumIndex).getCover());
+//                }
                 View.OnClickListener l = new View.OnClickListener() {
                     @Override
                     public void onClick(View clickedView) {
@@ -186,7 +190,9 @@ protected MediaPlayer mMediaPlayer;
     public void onDetach() {
         super.onDetach();
         //Todo pass link to main activity, to keep playing
-        mMediaPlayer.stop();
+        if(mMediaPlayer!=null) {
+            mMediaPlayer.stop();
+        }
         mMediaPlayer=null;
         mListener = null;
     }
@@ -227,7 +233,7 @@ protected MediaPlayer mMediaPlayer;
                     currentPlying = null;
                     mp = null;
 
-//                    mAdapterPlayList.notifyDataSetChanged();
+                    mAdapterPlayList.notifyDataSetChanged();
                 }
             });
         } catch (IllegalArgumentException e) {

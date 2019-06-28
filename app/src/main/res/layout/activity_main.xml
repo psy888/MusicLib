@@ -45,7 +45,8 @@
                     android:layout_weight="1"
                     android:id="@+id/ibSearch"
                     android:background="#00FFFFFF"
-                    android:src="@drawable/ic_search"/>
+                    android:src="@drawable/ic_search"
+                    android:focusedByDefault="true"/>
             </LinearLayout>
 
         </android.support.v7.widget.Toolbar>
@@ -65,17 +66,18 @@
             android:layout_marginTop="?attr/actionBarSize"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:id="@+id/rvCardsList"/>
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/fab"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_search"/>
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/fab"-->
+            <!--android:layout_gravity="bottom|end"-->
+            <!--android:layout_margin="16dp"-->
+            <!--android:src="@drawable/ic_search"/>-->
     </android.support.design.widget.CoordinatorLayout>
     <android.support.design.widget.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:id="@+id/navView"
         android:layout_gravity="start"
         app:menu="@menu/main_menu"
         app:headerLayout="@layout/menu_header"/>
