@@ -26,14 +26,23 @@ class Track implements Serializable {
         String unknown = "unknown";
         mTrackFile = trackFile;
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(trackFile.getAbsolutePath());
-        mTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE):getTitleFromFileName(trackFile);
-        mArtist = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST):getArtistFromFileName(trackFile);
-//        mDuration = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!=null);
-        mYear = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR):"-";
-        mGenre = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE):"-";
-        mAlbumTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM):unknown;
-//        mAlbumKey = MediaStore.Audio.keyFor(mAlbumTitle);
+        try {
+            mmr.setDataSource(trackFile.getAbsolutePath());
+            mTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE):getTitleFromFileName(trackFile);
+            mArtist = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST):getArtistFromFileName(trackFile);
+            mYear = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR):"-";
+            mGenre = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE):"-";
+            mAlbumTitle = (mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)!=null)?mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM):unknown;
+
+
+        }catch (RuntimeException e){
+
+            mTitle = getTitleFromFileName(trackFile);
+            mArtist =getArtistFromFileName(trackFile);
+            mYear = "-";
+            mGenre ="-";
+            mAlbumTitle = unknown;
+        }
 
         MainActivity.mTrackList.add(this);
         mAlbumIndex = StructureBuilder.findAlbum((MainActivity.mTrackList.size()-1),MainActivity.mAlbumsList);//???

@@ -2,6 +2,7 @@ package com.psy.musiclib;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -58,10 +59,13 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
     protected static ArrayList<Track> mTrackList;
     protected static ArrayList<Album> mSearchResult;
     Toolbar mToolbar;
+
     protected  RecyclerView rvCardsList;
     protected CardAdapter mCardAdapter;
     ArrayList<Track> mTracks;
     DrawerLayout mDrawerLayout;
+    static final String KEY_ALBUMS = "albums";
+    static final String KEY_TRACKS = "tracks";
 
 
     @Override
@@ -74,7 +78,10 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
                     permissions[1].contentEquals(Manifest.permission.READ_EXTERNAL_STORAGE)&&
                     grantResults[1] == PackageManager.PERMISSION_GRANTED)
             {
-                scanFiles();
+                if(mAlbumsList==null) {
+
+                    scanFiles();
+                }
             }
             else{
                 this.finish();
@@ -84,8 +91,12 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
     }
 
     private void scanFiles() {
-//        if (mAlbumsList == null | mAlbumsList.size() < 1) {
+        if (mAlbumsList == null) {
+            mAlbumsList = new ArrayList<>();
+            mTrackList= new ArrayList<>();
+
             File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
 //            File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
             for (File f :
                     musicDir.listFiles()) {
@@ -96,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
                 }
             }
 
-//        }
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -124,21 +135,26 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
             } catch (ClassNotFoundException e) {
                 Log.e(TAG, "Can't read base" + e.getMessage());
                 e.printStackTrace();
-            } finally {
-                if (mAlbumsList == null) {
-                    File base = new File(BASE);
-                    try {
-                        base.createNewFile();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                    mAlbumsList = new ArrayList<>();
-                    mTrackList= new ArrayList<>();
-                }
             }
+        }else{
+            mAlbumsList = (ArrayList<Album>) savedInstanceState.getSerializable(KEY_ALBUMS);
+            mTrackList = (ArrayList<Track>) savedInstanceState.getSerializable(KEY_TRACKS);
         }
-
         requestPermissions(PERMISSIONS, PERMISSION_REQUEST_ID);
+
+            if (mAlbumsList == null) {
+                File base = new File(BASE);
+                try {
+                    base.createNewFile();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                scanFiles();
+
+            }
+
+
+
 
 //mAlbumsList = new ArrayList<>();
 //        onRequestPermissionsResult(88, PERMISSIONS, new int[]{PackageManager.PERMISSION_GRANTED,PackageManager.PERMISSION_GRANTED});
@@ -220,8 +236,8 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
     }
 
     private void reloadBase() {
-        mAlbumsList = new ArrayList<>();
-        mTrackList = new ArrayList<>();
+        mAlbumsList = null;
+        mTrackList = null;
         scanFiles();
 //        mCardAdapter.notifyDataSetChanged();
         mCardAdapter = new CardAdapter(mAlbumsList);
@@ -229,6 +245,14 @@ public class MainActivity extends AppCompatActivity implements OnRequestPermissi
         mCardAdapter.setOnItemClickListener(listener);
         Log.d("TAG", "RELOADED");
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //todo save album and track list
+        outState.putSerializable(KEY_ALBUMS, mAlbumsList);
+        outState.putSerializable(KEY_TRACKS, mTrackList);
     }
 
     @Override

@@ -73,17 +73,19 @@ class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardHolder> {
         cardHolder.tvAlbumYear.setText(mAlbumsList.get(i).getYear());
 
         cardHolder.cardContainer.setBackgroundColor(mAlbumsList.get(i).getVibrantColor());
-
+//
         if(mAlbumsList.get(i).getCover()!=null) {
-
+//
             cardHolder.ivAlbumCover.setImageBitmap(mAlbumsList.get(i).getCover());
             cardHolder.ivAlbumCover.setVisibility(View.VISIBLE);
-
+//
         }
         else
         {
+
             cardHolder.ivAlbumCover.setVisibility(View.INVISIBLE);
         }
+
 
         if(mOnClickListener!=null){
             cardHolder.cvCard.setOnClickListener(mOnClickListener);

@@ -116,8 +116,8 @@ public class Album implements Serializable {
 
     public void setCover(byte[] BitmapByteArray) {
         mCover = BitmapByteArray;
-        //ToDo compress Bitmap byte array
-        Log.d("ALBUM COVER", "Byte Array IN = " + (mCover.length / 1024) + " kb");
+        // compress Bitmap byte array
+//        Log.d("ALBUM COVER", "Byte Array IN = " + (mCover.length / 1024) + " kb");
         //Compress bitmap
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
@@ -127,7 +127,7 @@ public class Album implements Serializable {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mCoverBitmap.compress(Bitmap.CompressFormat.JPEG, 30, baos);
         mCover = baos.toByteArray();
-        Log.d("ALBUM COVER", "Byte Array OUT = " + (mCover.length / 1024) + " kb");
+//        Log.d("ALBUM COVER", "Byte Array OUT = " + (mCover.length / 1024) + " kb");
         getBgColor(mCoverBitmap);
     }
 
@@ -138,6 +138,9 @@ public class Album implements Serializable {
         options.inJustDecodeBounds = false;
         options.inSampleSize = calculateInSampleSize(options,150,150);
         mCoverBitmap = BitmapFactory.decodeByteArray(mCover, 0, mCover.length, options); }
+        return mCoverBitmap;
+    }
+    public Bitmap getCoverBitmap(){
         return mCoverBitmap;
     }
 

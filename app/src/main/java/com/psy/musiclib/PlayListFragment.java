@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,10 +100,7 @@ protected MediaPlayer mMediaPlayer;
 //                Log.d("COUNT", "++++++++++" + track.getTitle());
                 final ImageButton ibPlay = v.findViewById(R.id.ibPlay);
                 final ImageButton ibPause = v.findViewById(R.id.ibPause);
-//                ImageView ivCover = v.findViewById(R.id.ivAlbumCoverPL);
-//                if(mAlbumsList.get(mAlbumIndex).getCover()!=null){
-//                    ivCover.setImageBitmap(mAlbumsList.get(mAlbumIndex).getCover());
-//                }
+
                 View.OnClickListener l = new View.OnClickListener() {
                     @Override
                     public void onClick(View clickedView) {
@@ -164,6 +162,10 @@ protected MediaPlayer mMediaPlayer;
         TextView tvAlbumInfo = layout.findViewById(R.id.tvAlbumInfo);
         Album curAlbum = mAlbumsList.get(mAlbumIndex);
         tvAlbumInfo.setText(curAlbum.getArtist() + "\n" + curAlbum.getName());
+        if(mAlbumsList.get(mAlbumIndex).getCover()!=null){
+            ImageView ivCover = layout.findViewById(R.id.ivAlbumCoverPL);
+            ivCover.setImageBitmap(mAlbumsList.get(mAlbumIndex).getCover());
+        }
 
         return layout;
     }
